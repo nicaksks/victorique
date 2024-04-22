@@ -3,8 +3,13 @@ use std::io::{BufWriter, ErrorKind, Write};
 use std::{fmt::Display, fs};
 
 use crate::logger::datetime::Datetime;
+use crate::logger::response::Webhook;
 use crate::utils::terminal::Colorize;
-pub struct Logger;
+
+pub struct Logger {
+    pub url: Option<String>,
+}
+
 pub enum Levels {
     Fatal,
     Error,
@@ -12,7 +17,9 @@ pub enum Levels {
     Info,
     Debug,
 }
+
 pub trait Constructor {
+    fn default() -> Self;
     fn level(&self, level: Levels) -> String;
     fn fatal<T: Display>(&self, content: T);
     fn error<T: Display>(&self, content: T);
@@ -21,12 +28,13 @@ pub trait Constructor {
     fn debug<T: Display>(&self, content: T);
     fn execute<T: Display>(&self, path: &str, level: Levels, content: T);
 
-    fn already_exist(&self, name: &str, content: String) {
-        match fs::read_dir(format!("./log/{}/{}", name, Datetime.date())) {
-            Ok(_) => self.create_file(name, content.clone()),
+    fn already_exist(&self, path: &str, url: Option<String>, content: String) {
+        Webhook.send(url, content.clone());
+        match fs::read_dir(format!("./log/{}/{}", path, Datetime.date())) {
+            Ok(_) => self.create_file(path, content.clone()),
             Err(e) => {
                 if e.kind() == ErrorKind::NotFound {
-                    self.create_dir(name, content)
+                    self.create_dir(path, content)
                 }
             }
         };
@@ -61,6 +69,10 @@ pub trait Constructor {
 }
 
 impl Constructor for Logger {
+    fn default() -> Self {
+        Logger { url: None }
+    }
+
     fn level(&self, level: Levels) -> String {
         match level {
             Levels::Fatal => "FATAL".magenta(),
@@ -94,6 +106,7 @@ impl Constructor for Logger {
     fn execute<T: Display>(&self, path: &str, level: Levels, content: T) {
         self.already_exist(
             path,
+            self.url.clone(),
             format!(
                 "{} - <{}>: {}",
                 Datetime.formatted_datetime(),

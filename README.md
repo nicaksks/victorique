@@ -4,7 +4,7 @@
 </p>
 
 * **Victorique** é um projeto simples com coisa **utils** que eu irei usar em meu projetos.
-* Comecei a estudar **Rust** no meu tempo livro e decidi criar pequenos projetos para eu pegar o básico de **Rust**.
+* Comecei a estudar **Rust** no meu tempo livre e decidi criar pequenos projetos para eu pegar o básico de **Rust**.
 O intuito dessa **lib** e com base na experiência que eu adquirir trabalhado com **Rust**, acabar criando **libs** melhores é maiores.
 * Eu sou uma pessoa que gosta de criar as próprias **libs**, e enquanto eu não encontro um trabalho na área, eu decidir criar algumas **libs** para eu obter mais experiência com **Rust**.
 * Poderia ter usado as **libs** da comunidade quem são melhores é mais incriveis? Sim, porém, eu quero aprender mais sobre **Rust**, e esse é o meu jeitinho de aprender.
