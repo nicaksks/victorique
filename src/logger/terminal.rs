@@ -1,6 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::{BufWriter, ErrorKind, Write};
 use std::{fmt::Display, fs};
+use regex::Regex;
 
 use crate::logger::datetime::Datetime;
 use crate::logger::response::Webhook;
@@ -29,7 +30,7 @@ pub trait Constructor {
     fn execute<T: Display>(&self, path: &str, level: Levels, content: T);
 
     fn already_exist(&self, path: &str, url: Option<String>, content: String) {
-        Webhook.send(url, content.clone());
+        Webhook.send(url, self.regex(content.clone()));
         match fs::read_dir(format!("./log/{}/{}", path, Datetime.date())) {
             Ok(_) => self.create_file(path, content.clone()),
             Err(e) => {
@@ -58,13 +59,18 @@ pub trait Constructor {
         match OpenOptions::new().append(true).create(true).open(&format) {
             Ok(file) => {
                 let mut buffer = BufWriter::new(file);
-                if let Err(e) = writeln!(buffer, "{}", content) {
+                if let Err(e) = writeln!(buffer, "{}", self.regex(content.clone())) {
                     eprintln!("{}", e);
                 }
                 println!("{}", content);
             }
             Err(e) => eprintln!("Error save log in file: {}", e),
         }
+    }
+
+    fn regex(&self, content: String) -> String {
+        let re = Regex::new(r"\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]").unwrap();
+        re.replace_all(content.as_str(), "").to_string()
     }
 }
 
@@ -108,7 +114,7 @@ impl Constructor for Logger {
             path,
             self.url.clone(),
             format!(
-                "{} - <{}>: {}",
+                "{} - |{}| -> {}",
                 Datetime.formatted_datetime(),
                 self.level(level),
                 content

@@ -26,6 +26,6 @@ impl Datetime {
         let date = self.date();
         let time = self.time(true);
 
-        format!("[{} - {}]", date.replace("-", "/"), time.replace("-", ":"))
+        format!("[{} | {}]", date.replace("-", "/"), time.replace("-", ":"))
     }
 }
